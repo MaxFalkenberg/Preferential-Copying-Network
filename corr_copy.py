@@ -27,7 +27,8 @@ class cc_graph:
     T:  int
         Number of edges in the current influence network.
     T_track: list
-        Number of edges in the influence network for full evolution of network. Only accessible is statistics==True.
+        Number of edges in the influence network for full evolution of
+        network. Only accessible is statistics==True.
     k: list
         Influence degree of node i at index i.
     obs_k: list
@@ -43,7 +44,12 @@ class cc_graph:
     add_nodes(N)
         Add N nodes to the network.
     degree_dist(mode='inf',plot=True)
-        Export degree distribution for influence network if mode == 'inf' or observed network if mode == 'obs'. Plot if plot == True.
+        Export degree distribution for influence network if mode == 'inf'
+        or observed network if mode == 'obs'. Plot if plot == True.
+    kernel(mode='inf',plot=True)
+        Calculate the relative attachment kernel for influence network
+        if mode == 'inf' or observed network if mode == 'obs'. Plot
+        if plot == True.
     """
 
     def __init__(self,p=0,seed = None,statistics = False):
@@ -138,7 +144,11 @@ class cc_graph:
         ----------
 
         mode: 'inf' or 'obs':
-            Export degree distribution for influence network if mode == 'inf'. Export degree distribution for observed network if mode == 'obs'. Plot degree distribution if plot == True.
+            Export degree distribution for influence network if mode == 'inf'.
+            Export degree distribution for observed network if mode == 'obs'.
+            Plot degree distribution if plot == True.
+        plot: boolean
+            Plot degree distribution if True.
 
         Returns
         -------
@@ -146,7 +156,8 @@ class cc_graph:
         x: ndarray
             Degree of nodes for degree distribution.
         y: ndarray
-            Probability that nodes in the network have a specific degree corresponding to equivalent index in x.
+            Probability that nodes in the network have a specific degree
+            corresponding to equivalent index in x.
 
         """
         if mode == 'inf':
@@ -172,3 +183,67 @@ class cc_graph:
             plt.tick_params(labelsize='large',direction='out',right = False,top=False)
             plt.show()
         return x,y
+
+    def kernel(self,mode='inf',plot=True):
+        """
+        Export relative attachment kernel for the network.
+
+        Parameters
+        ----------
+
+        mode: 'inf' or 'obs':
+            Export degree distribution for influence network if mode == 'inf'.
+            Export degree distribution for observed network if mode == 'obs'.
+            Plot degree distribution if plot == True.
+            Note, the relative attachment kernel for the influence network is
+            not the rescaled probability, but the rescaled expected number of
+            edges attached to nodes with specific degree at time t.
+        plot: boolean
+            Plot degree distribution if True.
+
+        Returns
+        -------
+
+        x: ndarray
+            Degree of nodes for relative attachment kernel.
+        y: ndarray
+            Rescaled attachment probability for nodes in the network.
+        """
+
+        if mode == 'obs': #Observed network
+            k1 = np.array(self.obs_k) #Degree in obs
+            k2 = np.array(self.k) #Attractiveness in obs
+        elif mode == 'inf': #Influence network
+            k1 = np.array(self.k) #Degree in inf
+            k2_raw = np.array(self.k)/self.T #Expected number of edges from direct attachment
+            copy_prob = np.zeros_like(k1,dtype='float64')
+            for count,i in enumerate(self.adjlist): #Expected number of edges from copying
+                for j in i:
+                    copy_prob[count] += self.p* k2_raw[j] #Contribution from each neighbour
+            k2 = k2_raw + copy_prob
+        else:
+            raise Exception("Require mode == 'inf' or mode == 'obs'.")
+        k1_bin = np.arange(np.min(k1),np.max(k1)+1) #Range of first degrees
+        k2_bin = []
+        for i in k1_bin: #Calculate average second degree for nodes with specific first degree
+            if i in k1:
+                k2_bin.append(np.mean(k2[k1==i]))
+            else:
+                k2_bin.append(None)
+        k2_bin = np.array(k2_bin)
+        k1_bin = k1_bin[k2_bin != None]
+        k2_bin = k2_bin[k2_bin != None]
+        k2_bin /= k2_bin[0]
+        k2_bin *= k1_bin[0] #Rescale relative attachment kernel such that k2_bin[0] = 1
+        if plot:
+            plt.plot(k1_bin,k2_bin,marker='.',ls='',label = r'$N = $' + str(self.t))
+            plt.xscale('log')
+            plt.yscale('log')
+            plt.xlabel(r'$k$',fontsize=24)
+            plt.ylabel(r'$\phi(k,1)$',fontsize=24)
+            linear = np.arange(np.min(k1_bin),np.max(k1_bin)+1)
+            plt.plot(linear,linear,ls='--',marker='',color='k',label = r'$\phi(k,1) \propto k$') #Expected scaling for BA model
+            plt.legend(loc='best')
+            plt.tight_layout()
+            plt.show()
+        return k1_bin,k2_bin
