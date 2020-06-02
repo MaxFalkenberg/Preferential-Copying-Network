@@ -79,6 +79,7 @@ class cc_graph:
         self.t = 2 #time step. Equals total number of nodes.
         self.p = p #copying probability
         self.seed = seed #Random seed
+        random.seed(seed)
         self.__statistics = statistics #Track statistics?
         self.__targets = [0,1] #Target list
         self.T = 2 #Number of targets (including repeats)
@@ -96,6 +97,7 @@ class cc_graph:
         N: int
             Number of nodes to add to the network.
         """
+        start_time = time.time()
         for i in range(N):
             target = random.choice(self.__targets) #Initial target
             self.obs_adjlist[target] += [self.t] #Updates neighbors in observed network
@@ -119,6 +121,7 @@ class cc_graph:
             if self.__statistics:
                 self.T += 2*len(copy_nodes)
                 self.T_track += [self.T]
+        print(time.time()-start_time)
 
     def degree_dist(self,mode = 'inf',plot=True):
         """
