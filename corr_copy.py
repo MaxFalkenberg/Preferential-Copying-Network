@@ -47,6 +47,8 @@ class cc_graph:
         Calculate the relative attachment kernel for influence network
         if mode == 'inf' or observed network if mode == 'obs'. Plot
         if plot == True.
+    plot_edge_growth()
+        Plots edge growth if statistics have been recorded.
     """
 
     def __init__(self,p=0,seed = None,statistics = False):
@@ -220,3 +222,21 @@ class cc_graph:
             plt.tight_layout()
             plt.show()
         return k1_bin,k2_bin
+
+    def plot_edge_growth(self):
+        """
+        Plot number of edges in the influence network over time.
+        """
+        if self.__statistics != True:
+            raise Exception('Statistics for edge growth not recorded.')
+        x = np.arange(1,len(self.T_track)+1,dtype='uint64') #time
+        plt.plot(x,self.T_track) #edge growth
+        plt.plot(x,x,color='k',ls='--',label=r'$\propto t$') #linear scaling
+        plt.plot(x,(x**2)/2,color='k',ls=':',label=r'$\propto t^{2}/2$') #complete graph
+        plt.xlabel(r'$t$',fontsize = 21)
+        plt.ylabel(r'$E(t)$',fontsize = 21)
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.legend(loc='best')
+        plt.tight_layout()
+        plt.show()
