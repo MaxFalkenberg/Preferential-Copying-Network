@@ -84,7 +84,7 @@ class cc_graph:
         self.obs_adjlist = [[1],[0]] #Adjacency list for the observed network
         self.k =[1,1] #Degree of nodes in influence network
         self.obs_k = [1,1] #Degree of nodes in observed network
-        self.T_track = [1,1] #Track number of edges in influence network over time
+        self.T_track = [2,2] #Track number of edges in influence network over time
 
     def add_nodes(self,N):
         """
@@ -106,7 +106,6 @@ class cc_graph:
             for j in copy_candidates:
                 if random.random() < self.p:
                     copy_nodes.append(j)
-            # copy_nodes = copy_candidates[np.random.rand(len(copy_candidates)) < self.p].astype('list') + [target] #Nodes to be copied
             self.__targets += copy_nodes #New copied targets
             self.__targets += [self.t]*len(copy_nodes) #New node targets
             self.adjlist += [copy_nodes] #Adjust adjacency lists
@@ -117,8 +116,6 @@ class cc_graph:
             self.t += 1
             if self.__statistics:
                 self.T_track += [self.T]
-                # self.var_k += [np.var(self.k)]
-                # self.var_obs_k += [np.var(self.obs_k)]
 
     def degree_dist(self,mode = 'inf',plot=True):
         """
