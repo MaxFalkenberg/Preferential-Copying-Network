@@ -115,6 +115,7 @@ class cc_graph:
             self.k += [len(copy_nodes)]
             self.t += 1
             if self.__statistics:
+                self.T += 2*len(copy_nodes)
                 self.T_track += [self.T]
 
     def degree_dist(self,mode = 'inf',plot=True):
