@@ -86,7 +86,7 @@ class cc_graph:
         self.obs_adjlist = [[1],[0]] #Adjacency list for the observed network
         self.k =[1,1] #Degree of nodes in influence network
         self.obs_k = [1,1] #Degree of nodes in observed network
-        self.T_track = [2,2] #Track number of edges in influence network over time
+        self.T_track = [] #Track number of edges in influence network over time
 
     def add_nodes(self,N):
         """
@@ -229,10 +229,11 @@ class cc_graph:
         """
         if self.__statistics != True:
             raise Exception('Statistics for edge growth not recorded.')
-        x = np.arange(1,len(self.T_track)+1,dtype='uint64') #time
-        plt.plot(x,self.T_track) #edge growth
-        plt.plot(x,x,color='k',ls='--',label=r'$\propto t$') #linear scaling
-        plt.plot(x,(x**2)/2,color='k',ls=':',label=r'$\propto t^{2}/2$') #complete graph
+        x = np.arange(2,len(self.T_track)+2,dtype='uint64') #time
+        x_track = np.arange(3,len(self.T_track)+3,dtype='uint64') #time
+        plt.plot(x_track,np.array(self.T_track)/2) #edge growth
+        plt.plot(x,x-1,color='k',ls='--',label=r'$\propto t$') #linear scaling
+        plt.plot(x,(x*(x-1))/2,color='k',ls=':',label=r'$\propto t^{2}/2$') #complete graph
         plt.xlabel(r'$t$',fontsize = 21)
         plt.ylabel(r'$E(t)$',fontsize = 21)
         plt.xscale('log')
