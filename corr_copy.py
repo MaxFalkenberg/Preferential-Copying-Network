@@ -5,17 +5,16 @@
 #    BSD license.
 """
 Correlated copying graph generator.
-
 """
 
 import numpy as np
+import random
 import matplotlib.pyplot as plt
 import time
 
 class cc_graph:
     """
     Creates a preferential attachment graph object for BA model or k2 model.
-
     Attributes
     ----------
     t: int
@@ -37,10 +36,8 @@ class cc_graph:
         Adjacency list for influence network.
     obs_adjlist: list of lists
         Adjacency list for observed network.
-
     Methods
     -------
-
     add_nodes(N)
         Add N nodes to the network.
     degree_dist(mode='inf',plot=True)
@@ -55,11 +52,8 @@ class cc_graph:
     def __init__(self,p=0,seed = None,statistics = False):
         """
         Class for undirected correlated copying model.
-
-
         Parameters
         ----------
-
         p    :  float, optional, default = 0.
                 copying probability
         seed : integer, random_state, or None (default)
@@ -67,13 +61,9 @@ class cc_graph:
                See :ref:`Randomness<randomness>`.
         statistics : boolean, default = True.
                Boolean to indicate whether to store statistics or not.
-
-
         Returns
         -------
         G : Graph
-
-
         Raises
         ------
         Error
@@ -87,7 +77,6 @@ class cc_graph:
         self.t = 2 #time step. Equals total number of nodes.
         self.p = p #copying probability
         self.seed = seed #Random seed
-        np.random.seed(seed = seed) #set random seed
         self.__statistics = statistics #Track statistics?
         self.__targets = [0,1] #Target list
         self.T = 2 #Number of targets (including repeats)
@@ -100,16 +89,13 @@ class cc_graph:
     def add_nodes(self,N):
         """
         Add N nodes to the network.
-
         Parameters
         ----------
-
         N: int
             Number of nodes to add to the network.
         """
-        start = time.time() #Time counter
         for i in range(N):
-            target = self.__targets[np.random.randint(self.T)] #Initial target
+            target = random.choice(self.__targets) #Initial target
             self.obs_adjlist[target] += [self.t] #Updates neighbors in observed network
             self.obs_adjlist += [[target]]
             self.obs_k += [1]
@@ -118,12 +104,11 @@ class cc_graph:
             copy_candidates = self.adjlist[target] #Neighbors of target which may be copied
             copy_nodes = [target]
             for j in copy_candidates:
-                if np.random.rand() < self.p:
+                if random.random() < self.p:
                     copy_nodes.append(j)
             # copy_nodes = copy_candidates[np.random.rand(len(copy_candidates)) < self.p].astype('list') + [target] #Nodes to be copied
             self.__targets += copy_nodes #New copied targets
             self.__targets += [self.t]*len(copy_nodes) #New node targets
-            self.T += 2*len(copy_nodes) #Total number of targets
             self.adjlist += [copy_nodes] #Adjust adjacency lists
             for j in copy_nodes: #Adjust adjacency lists
                 self.adjlist[j] += [self.t]
@@ -134,31 +119,25 @@ class cc_graph:
                 self.T_track += [self.T]
                 # self.var_k += [np.var(self.k)]
                 # self.var_obs_k += [np.var(self.obs_k)]
-        print(time.time()-start)
 
     def degree_dist(self,mode = 'inf',plot=True):
         """
         Export degree distribution for the observed or influence network.
-
         Parameters
         ----------
-
         mode: 'inf' or 'obs':
             Export degree distribution for influence network if mode == 'inf'.
             Export degree distribution for observed network if mode == 'obs'.
             Plot degree distribution if plot == True.
         plot: boolean
             Plot degree distribution if True.
-
         Returns
         -------
-
         x: ndarray
             Degree of nodes for degree distribution.
         y: ndarray
             Probability that nodes in the network have a specific degree
             corresponding to equivalent index in x.
-
         """
         if mode == 'inf':
             y,x = np.histogram(self.k,bins=int(np.max(self.k)) - int(np.min(self.k)))
@@ -187,10 +166,8 @@ class cc_graph:
     def kernel(self,mode='inf',plot=True):
         """
         Export relative attachment kernel for the network.
-
         Parameters
         ----------
-
         mode: 'inf' or 'obs':
             Export degree distribution for influence network if mode == 'inf'.
             Export degree distribution for observed network if mode == 'obs'.
@@ -200,10 +177,8 @@ class cc_graph:
             edges attached to nodes with specific degree at time t.
         plot: boolean
             Plot degree distribution if True.
-
         Returns
         -------
-
         x: ndarray
             Degree of nodes for relative attachment kernel.
         y: ndarray
