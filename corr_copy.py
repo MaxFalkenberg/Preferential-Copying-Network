@@ -36,6 +36,12 @@ class cc_graph:
         Adjacency list for influence network.
     obs_adjlist: list of lists
         Adjacency list for observed network.
+    second_moment: int
+        Current average second moment of degree. Only recorded if
+        statistics == True. Not normalised by N.
+    second_moment_track: list
+        Average second moment of degree over time. Only recorded if
+        statistics == True. Not normalised by N.
     Methods
     -------
     add_nodes(N)
@@ -47,7 +53,7 @@ class cc_graph:
         Calculate the relative attachment kernel for influence network
         if mode == 'inf' or observed network if mode == 'obs'. Plot
         if plot == True.
-    plot_edge_growth()
+    plot_edge_growth(scaling=None)
         Plots edge growth if statistics have been recorded.
     """
 
@@ -88,6 +94,8 @@ class cc_graph:
         self.k =[1,1] #Degree of nodes in influence network
         self.obs_k = [1,1] #Degree of nodes in observed network
         self.T_track = [] #Track number of edges in influence network over time
+        self.second_moment = 2 #Second moment currently
+        self.second_moment_track = [] #Second moment over time.
 
     def add_nodes(self,N):
         """
@@ -120,7 +128,11 @@ class cc_graph:
             self.t += 1
             if self.__statistics:
                 self.T += 2*len(copy_nodes)
-                self.T_track += [self.T]
+                self.T_track += [self.T] #Track number of edges
+                self.second_moment += len(copy_nodes)**2 #Change in sum from new node
+                for j in copy_nodes: #Change in second moment from existing nodes
+                    self.second_moment += (2*self.k[j])-1 #+k**2 - (k-1)**2
+                self.second_moment_track += [self.second_moment]
         print(time.time()-start_time)
 
     def degree_dist(self,mode = 'inf',plot=True):
@@ -226,17 +238,33 @@ class cc_graph:
             plt.show()
         return k1_bin,k2_bin
 
-    def plot_edge_growth(self):
+    def plot_edge_growth(self,scaling=None):
         """
         Plot number of edges in the influence network over time.
+
+        Parameters
+        ----------
+        scaling: float
+            Plot hypothetical rescaled scaling for growth with exponent 'scaling'.
+            Require 1<=scaling<=2.
+            Ignored if float == None.
+
         """
         if self.__statistics != True:
             raise Exception('Statistics for edge growth not recorded.')
         x = np.arange(2,len(self.T_track)+2,dtype='uint64') #time
         x_track = np.arange(3,len(self.T_track)+3,dtype='uint64') #time
-        plt.plot(x_track,np.array(self.T_track)/2) #edge growth
+
         plt.plot(x,x-1,color='k',ls='--',label=r'$\propto t$') #linear scaling
-        plt.plot(x,(x*(x-1))/2,color='k',ls=':',label=r'$\propto t^{2}/2$') #complete graph
+        plt.plot(x,(x*(x-1))/2,color='k',ls='-.',label=r'$\propto t^{2}$') #complete graph
+        if scaling != None: #Add trendline for custom scaling
+            if scaling < 1. or scaling > 2.:
+                raise Exception('Require 1. <= scaling <= 2.')
+            else:
+                p_scaling = x ** (scaling) #Assumed scaling
+                p_scaling /= p_scaling[0]
+                plt.plot(x,p_scaling,color='k',ls=':',label=r'$\propto t^{scale}$') #p scaling
+        plt.plot(x_track,np.array(self.T_track)/2) #edge growth
         plt.xlabel(r'$t$',fontsize = 21)
         plt.ylabel(r'$E(t)$',fontsize = 21)
         plt.xscale('log')
