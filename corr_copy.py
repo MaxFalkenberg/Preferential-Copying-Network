@@ -172,9 +172,9 @@ class cc_graph:
             plt.plot(x,4./(x*(x+1)*(x+2)),ls='--',color = 'k')
             plt.xlabel(r'$k$',fontsize = 21)
             plt.ylabel(r'$P(k)$',fontsize = 21)
-            # plt.tight_layout()
             plt.title(mode,fontsize=15)
             plt.tick_params(labelsize='large',direction='out',right = False,top=False)
+            plt.tight_layout()
             plt.show()
         return x,y
 
