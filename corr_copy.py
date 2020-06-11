@@ -19,7 +19,7 @@ class cc_graph:
     ----------
     t: int
         Timestep. Equal to number of nodes in the network.
-    p: float
+    p: float or 'k2'
         Copying probability.
     seed: int
         Random number seed
@@ -62,8 +62,10 @@ class cc_graph:
         Class for undirected correlated copying model.
         Parameters
         ----------
-        p    :  float, optional, default = 0.
+        p    :  float or 'k2', optional, default = 0.
                 copying probability
+                If p == 'k2', copy probability automatically set as ratio of
+                observed to influence degree.
         seed : integer, random_state, or None (default)
                Indicator of random number generation state.
                See :ref:`Randomness<randomness>`.
@@ -77,8 +79,9 @@ class cc_graph:
         Error
             If `p` not in range ``0 <= p <= 1``.
         """
-
-        if p < 0 or p > 1:
+        if p == 'k2':
+            pass
+        elif p < 0 or p > 1:
             raise Exception("Probability `p` not in range `0 <= p <= 1`.")
 
 
@@ -116,8 +119,12 @@ class cc_graph:
             copy_candidates = self.adjlist[target] #Neighbors of target which may be copied
             copy_nodes = [target]
             for j in copy_candidates:
-                if random.random() < self.p:
-                    copy_nodes.append(j)
+                if isinstance(self.p,str):
+                    if random.random() < self.obs_k[j]/self.k[j]:
+                        copy_nodes.append(j)
+                else:
+                    if random.random() < self.p:
+                        copy_nodes.append(j)
             self.__targets += copy_nodes #New copied targets
             self.__targets += [self.t]*len(copy_nodes) #New node targets
             self.adjlist += [copy_nodes] #Adjust adjacency lists
@@ -204,13 +211,16 @@ class cc_graph:
             k1 = np.array(self.obs_k) #Degree in obs
             k2 = np.array(self.k) #Attractiveness in obs
         elif mode == 'inf': #Influence network
-            k1 = np.array(self.k) #Degree in inf
-            k2_raw = np.array(self.k)/self.T #Expected number of edges from direct attachment
-            copy_prob = np.zeros_like(k1,dtype='float64')
-            for count,i in enumerate(self.adjlist): #Expected number of edges from copying
-                for j in i:
-                    copy_prob[count] += self.p* k2_raw[j] #Contribution from each neighbour
-            k2 = k2_raw + copy_prob
+            if isinstance(self.p,str):
+                raise Exception("Influence kernel not available for self.p = \'k2\'")
+            else:
+                k1 = np.array(self.k) #Degree in inf
+                k2_raw = np.array(self.k)/self.T #Expected number of edges from direct attachment
+                copy_prob = np.zeros_like(k1,dtype='float64')
+                for count,i in enumerate(self.adjlist): #Expected number of edges from copying
+                    for j in i:
+                        copy_prob[count] += self.p* k2_raw[j] #Contribution from each neighbour
+                k2 = k2_raw + copy_prob
         else:
             raise Exception("Require mode == 'inf' or mode == 'obs'.")
         k1_bin = np.arange(np.min(k1),np.max(k1)+1) #Range of first degrees
@@ -266,11 +276,15 @@ class cc_graph:
                 plt.plot(x,p_scaling,color='k',ls=':',label=r'$\propto t^{scale}$') #p scaling
         T_track = np.array(self.T_track)/2
         plt.plot(x_track,T_track) #edge growth
-        k_mom = self.p * np.array(self.second_moment_track)/(2*T_track)
-        #Ratio of second to first moment scaled by p
-        crossover = np.argmin(k_mom<1)
-        plt.plot([x_track[crossover],x_track[crossover]],[T_track[0]-1,T_track[crossover]],ls=':',color='k')
-        plt.plot([x_track[0]-1,x_track[crossover]],[T_track[crossover],T_track[crossover]],ls=':',color='k')
+        if isinstance(self.p,str):
+            pass
+        else:
+            k_mom = self.p * np.array(self.second_moment_track)/(2*T_track)
+            #Ratio of second to first moment scaled by p
+            crossover = np.argmin(k_mom<1) #Index where k_mom exceeds 1
+            if k_mom[crossover]>1: #Only plot if crossover reached
+                plt.plot([x_track[crossover],x_track[crossover]],[T_track[0]-1,T_track[crossover]],ls=':',color='k')
+                plt.plot([x_track[0]-1,x_track[crossover]],[T_track[crossover],T_track[crossover]],ls=':',color='k')
         plt.xlabel(r'$t$',fontsize = 21)
         plt.ylabel(r'$E(t)$',fontsize = 21)
         plt.xlim((2,None))
