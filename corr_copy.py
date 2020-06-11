@@ -264,9 +264,17 @@ class cc_graph:
                 p_scaling = x ** (scaling) #Assumed scaling
                 p_scaling /= p_scaling[0]
                 plt.plot(x,p_scaling,color='k',ls=':',label=r'$\propto t^{scale}$') #p scaling
-        plt.plot(x_track,np.array(self.T_track)/2) #edge growth
+        T_track = np.array(self.T_track)/2
+        plt.plot(x_track,T_track) #edge growth
+        k_mom = self.p * np.array(self.second_moment_track)/(2*T_track)
+        #Ratio of second to first moment scaled by p
+        crossover = np.argmin(k_mom<1)
+        plt.plot([x_track[crossover],x_track[crossover]],[T_track[0]-1,T_track[crossover]],ls=':',color='k')
+        plt.plot([x_track[0]-1,x_track[crossover]],[T_track[crossover],T_track[crossover]],ls=':',color='k')
         plt.xlabel(r'$t$',fontsize = 21)
         plt.ylabel(r'$E(t)$',fontsize = 21)
+        plt.xlim((2,None))
+        plt.ylim((1,None))
         plt.xscale('log')
         plt.yscale('log')
         plt.legend(loc='best')
