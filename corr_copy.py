@@ -161,7 +161,7 @@ class cc_graph:
                 neighborsum_inf = 0
                 for j in copy_nodes:
                     self.twomoment_inf[-1] += 2*self.k[j]-1
-                    k2_inf = k2_inf.union([j]+self.adjlist[j]) # all nodes 1 or 2 steps from new node
+                    k2_inf |= set([j]+self.adjlist[j]) # all nodes 1 or 2 steps from new node
                     twosteps += len(set(self.adjlist[j]).difference(copy_nodes))-1 # new node contributes 1 to nodes 2 steps away via nodes 1 step away (exclude new node)
                     neighborsum_inf += self.k[j]
                 self.k2_inf += [self.k2_inf[-1] + 2*(len(k2_inf)-1)] # (new node adds 1 to k2 of all nodes 1 or 2 steps from new node) = k2 of new node
@@ -349,5 +349,5 @@ class cc_graph:
         plt.show()
 
 G = cc_graph(p=0.1, statistics=True)
-G.add_nodes(10**4)
+G.add_nodes(10**5)
 G.plot_averages()
