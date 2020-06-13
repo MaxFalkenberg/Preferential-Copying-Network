@@ -100,6 +100,15 @@ class cc_graph:
         self.second_moment = 2 #Second moment currently
         self.second_moment_track = [] #Second moment over time.
 
+        self.k1_obs = [2] # total observed first degree over time
+        self.k1_inf = [2] # total influence first degree over time
+        self.k2_obs = [2] # total observed second degree over time
+        self.k2_inf = [2] # total infuence second degree over time
+        self.twomoment_obs = [2] # total observed second moment over time
+        self.twomoment_inf = [2] # total influence second moment over time
+        self.neighborsum_obs = [2] # total observed neighbour degree sum over time 
+        self.neighborsum_inf = [2] # total obversed neighbor degree sum over time
+
     def add_nodes(self,N):
         """
         Add N nodes to the network.
@@ -140,6 +149,23 @@ class cc_graph:
                 for j in copy_nodes: #Change in second moment from existing nodes
                     self.second_moment += (2*self.k[j])-1 #+k**2 - (k-1)**2
                 self.second_moment_track += [self.second_moment]
+
+                self.k1_obs += [self.k1_obs[-1]+2*self.obs_k[-1]] # each new observed edge adds 2 to the sum
+                self.k1_inf += [self.k1_inf[-1]+2*self.k[-1]] # each new influence edge adds 2 to the sum
+                self.twomoment_obs += [self.twomoment_obs[-1]+self.obs_k[-1]**2+2*self.obs_k[target]-1] # add new node value and modified (single) target value minus previous target value
+                self.twomoment_inf += [self.twomoment_inf[-1]+self.k[-1]**2] # add new node contribution first then...
+                self.k2_obs += [self.k2_obs[-1]+2*(self.obs_k[target])] # (new node adds 1 to k2 of target and each neighbor of target excluding new node) = new node's k2
+                self.neighborsum_obs += [self.neighborsum_obs[-1]+1+self.obs_k[target]-1+self.obs_k[target]] # add new node's contribution to target's neighbor sum and target's neighbors' sums excluding new node, and (new node's neighbor sum = target's obs_k), respectively
+                k2_inf = set()
+                twosteps = 0
+                neighborsum_inf = 0
+                for j in copy_nodes:
+                    self.twomoment_inf[-1] += 2*self.k[j]-1
+                    k2_inf.union([j]+self.adjlist[j]) # all nodes 1 or 2 steps from new node
+                    twosteps += len(set(self.adjlist[j]).difference(copy_nodes))-1 # new node contributes 1 to nodes 2 steps away via nodes 1 step away (exclude new node)
+                    neighborsum_inf += self.k[j]
+                self.k2_inf += [self.k2_inf[-1] + 2*(len(self.k2_inf[-1])-1)] # (new node adds 1 to k2 of all nodes 1 or 2 steps from new node) = k2 of new node
+                self.neighborsum_inf += [self.neighborsum_inf[-1]+len(copy_nodes)*self.k[-1]+twosteps+neighborsum_inf] # adds new node's contribution to nodes 1 step away and 2 steps away, and new node's neighbor sum, respectively
         print(time.time()-start_time)
 
     def degree_dist(self,mode = 'inf',plot=True):
@@ -251,14 +277,12 @@ class cc_graph:
     def plot_edge_growth(self,scaling=None):
         """
         Plot number of edges in the influence network over time.
-
         Parameters
         ----------
         scaling: float
             Plot hypothetical rescaled scaling for growth with exponent 'scaling'.
             Require 1<=scaling<=2.
             Ignored if float == None.
-
         """
         if self.__statistics != True:
             raise Exception('Statistics for edge growth not recorded.')
