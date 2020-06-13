@@ -161,10 +161,10 @@ class cc_graph:
                 neighborsum_inf = 0
                 for j in copy_nodes:
                     self.twomoment_inf[-1] += 2*self.k[j]-1
-                    k2_inf.union([j]+self.adjlist[j]) # all nodes 1 or 2 steps from new node
+                    k2_inf = k2_inf.union([j]+self.adjlist[j]) # all nodes 1 or 2 steps from new node
                     twosteps += len(set(self.adjlist[j]).difference(copy_nodes))-1 # new node contributes 1 to nodes 2 steps away via nodes 1 step away (exclude new node)
                     neighborsum_inf += self.k[j]
-                self.k2_inf += [self.k2_inf[-1] + 2*(len(self.k2_inf[-1])-1)] # (new node adds 1 to k2 of all nodes 1 or 2 steps from new node) = k2 of new node
+                self.k2_inf += [self.k2_inf[-1] + 2*(len(k2_inf)-1)] # (new node adds 1 to k2 of all nodes 1 or 2 steps from new node) = k2 of new node
                 self.neighborsum_inf += [self.neighborsum_inf[-1]+len(copy_nodes)*self.k[-1]+twosteps+neighborsum_inf] # adds new node's contribution to nodes 1 step away and 2 steps away, and new node's neighbor sum, respectively
         print(time.time()-start_time)
 
@@ -318,3 +318,36 @@ class cc_graph:
         plt.legend(loc='best')
         plt.tight_layout()
         plt.show()
+
+    def plot_averages(self):
+        k1_obs = np.array(self.k1_obs)/np.arange(1,self.t,dtype=float)
+        k1_inf = np.array(self.k1_inf)/np.arange(1,self.t,dtype=float)
+        k2_obs = np.array(self.k2_obs)/np.arange(1,self.t,dtype=float)
+        k2_inf = np.array(self.k2_inf)/np.arange(1,self.t,dtype=float)
+        twomoment_obs = np.array(self.twomoment_obs)/np.arange(1,self.t,dtype=float)
+        twomoment_inf = np.array(self.twomoment_inf)/np.arange(1,self.t,dtype=float)
+        neighborsum_obs = np.array(self.neighborsum_obs)/np.arange(1,self.t,dtype=float)
+        neighborsum_inf = np.array(self.neighborsum_inf)/np.arange(1,self.t,dtype=float)
+
+        plt.figure()
+        plt.plot(k1_obs,label='k1_obs')
+        plt.legend()
+
+        plt.figure()
+        plt.plot(k1_inf,label='k1_inf')
+        plt.plot(k2_obs,label='k2_obs')
+        plt.plot(twomoment_obs,label='twomoment_obs')
+        plt.plot(neighborsum_obs,label='neighborsum_obs')
+        plt.legend()
+
+        plt.figure()
+        plt.plot(k2_inf,label='k2_inf')
+        plt.plot(twomoment_inf,label='twomoment_inf')
+        plt.plot(neighborsum_inf,label='neighborsum_inf')
+        plt.legend()
+
+        plt.show()
+
+G = cc_graph(p=0.1, statistics=True)
+G.add_nodes(10**4)
+G.plot_averages()
