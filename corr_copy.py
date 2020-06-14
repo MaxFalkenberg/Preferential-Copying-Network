@@ -319,7 +319,17 @@ class cc_graph:
         plt.tight_layout()
         plt.show()
 
-    def plot_averages(self):
+    def plot_averages(self,log=None):
+        """
+        Plot averages of interest over time
+        Parameters
+        ----------
+        log: string
+            Plot log-log if log == 'log'
+            Plot log y if log == 'y'
+            Ignored if log == None.
+        """
+
         k1_obs = np.array(self.k1_obs)/np.arange(1,self.t,dtype=float)
         k1_inf = np.array(self.k1_inf)/np.arange(1,self.t,dtype=float)
         k2_obs = np.array(self.k2_obs)/np.arange(1,self.t,dtype=float)
@@ -339,6 +349,8 @@ class cc_graph:
 
         plt.figure()
         plt.plot(k1_obs,'.',label='k1_obs') # plot average observed first degree
+        if log is not None: plt.yscale('log')
+        if log == 'log': plt.xscale('log')
         plt.xlabel(r'$t$')
         plt.legend()
 
@@ -347,6 +359,8 @@ class cc_graph:
         plt.plot(k2_obs,'.',label='k2_obs') # plot average observed second degree
         plt.plot(twomoment_obs,'.',label='twomoment_obs') # plot average observed second moment
         plt.plot(neighborsum_obs,'.',label='neighborsum_obs') # plot average observed neighbor degree sum
+        if log is not None: plt.yscale('log')
+        if log == 'log': plt.xscale('log')
         plt.xlabel(r'$t$')
         plt.legend()
 
@@ -354,6 +368,8 @@ class cc_graph:
         plt.plot(k2_inf,'.',label='k2_inf') # plot average influence second degree
         plt.plot(twomoment_inf,'.',label='twomoment_inf') # plot average influence second moment
         plt.plot(neighborsum_inf,'.',label='neighborsum_inf') # plot average influence neighbor degree sum
+        if log is not None: plt.yscale('log')
+        if log == 'log': plt.xscale('log')
         plt.xlabel(r'$t$')
         plt.legend()
 
@@ -361,4 +377,4 @@ class cc_graph:
 
 G = cc_graph(p=0.1, statistics=True)
 G.add_nodes(10**5)
-G.plot_averages()
+G.plot_averages(log='log')
