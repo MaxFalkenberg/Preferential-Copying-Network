@@ -329,21 +329,32 @@ class cc_graph:
         neighborsum_obs = np.array(self.neighborsum_obs)/np.arange(1,self.t,dtype=float)
         neighborsum_inf = np.array(self.neighborsum_inf)/np.arange(1,self.t,dtype=float)
 
+        self.k1_inf = [2] # total influence first degree over time
+        self.k2_obs = [2] # total observed second degree over time
+        self.k2_inf = [2] # total infuence second degree over time
+        self.twomoment_obs = [2] # total observed second moment over time
+        self.twomoment_inf = [2] # total influence second moment over time
+        self.neighborsum_obs = [2] # total observed neighbour degree sum over time 
+        self.neighborsum_inf = [2] # total obversed neighbor degree sum over time
+
         plt.figure()
-        plt.plot(k1_obs,label='k1_obs')
+        plt.plot(k1_obs,'.',label='k1_obs') # plot average observed first degree
+        plt.xlabel(r'$t$')
         plt.legend()
 
         plt.figure()
-        plt.plot(k1_inf,label='k1_inf')
-        plt.plot(k2_obs,label='k2_obs')
-        plt.plot(twomoment_obs,label='twomoment_obs')
-        plt.plot(neighborsum_obs,label='neighborsum_obs')
+        plt.plot(k1_inf,'.',label='k1_inf') # plot average influence first degree
+        plt.plot(k2_obs,'.',label='k2_obs') # plot average observed second degree
+        plt.plot(twomoment_obs,'.',label='twomoment_obs') # plot average observed second moment
+        plt.plot(neighborsum_obs,'.',label='neighborsum_obs') # plot average observed neighbor degree sum
+        plt.xlabel(r'$t$')
         plt.legend()
 
         plt.figure()
-        plt.plot(k2_inf,label='k2_inf')
-        plt.plot(twomoment_inf,label='twomoment_inf')
-        plt.plot(neighborsum_inf,label='neighborsum_inf')
+        plt.plot(k2_inf,'.',label='k2_inf') # plot average influence second degree
+        plt.plot(twomoment_inf,'.',label='twomoment_inf') # plot average influence second moment
+        plt.plot(neighborsum_inf,'.',label='neighborsum_inf') # plot average influence neighbor degree sum
+        plt.xlabel(r'$t$')
         plt.legend()
 
         plt.show()
