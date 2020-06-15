@@ -36,12 +36,23 @@ class cc_graph:
         Adjacency list for influence network.
     obs_adjlist: list of lists
         Adjacency list for observed network.
-    second_moment: int
-        Current average second moment of degree. Only recorded if
-        statistics == True. Not normalised by N.
-    second_moment_track: list
-        Average second moment of degree over time. Only recorded if
-        statistics == True. Not normalised by N.
+    k1_obs: list
+        total/average observed first degree over time
+    k1_inf: list
+        total/average influence first degree over time
+    k2_obs: list
+        total/average observed second degree over time
+    k2_inf: list
+        total/average infuence second degree over time
+    twomoment_obs: list
+        total/average observed second moment over time
+    twomoment_inf: list
+        total/average influence second moment over time
+    neighborsum_obs: list
+        total observed neighbour degree sum over time 
+    neighborsum_inf: list
+        total obversed neighbor degree sum over time
+
     Methods
     -------
     add_nodes(N)
@@ -55,6 +66,10 @@ class cc_graph:
         if plot == True.
     plot_edge_growth(scaling=None)
         Plots edge growth if statistics have been recorded.
+    plot_averages(log=None)
+        Plots evolution of averages of interest
+        if log == 'log', plots log-log graphs
+        if log== 'y', plots log y graphs
     """
 
     def __init__(self,p=0,seed = None,statistics = False):
@@ -97,8 +112,6 @@ class cc_graph:
         self.k =[1,1] #Degree of nodes in influence network
         self.obs_k = [1,1] #Degree of nodes in observed network
         self.T_track = [] #Track number of edges in influence network over time
-        self.second_moment = 2 #Second moment currently
-        self.second_moment_track = [] #Second moment over time.
 
         self.k1_obs = [2] # total observed first degree over time
         self.k1_inf = [2] # total influence first degree over time
@@ -145,11 +158,6 @@ class cc_graph:
             if self.__statistics:
                 self.T += 2*len(copy_nodes)
                 self.T_track += [self.T] #Track number of edges
-                self.second_moment += len(copy_nodes)**2 #Change in sum from new node
-                for j in copy_nodes: #Change in second moment from existing nodes
-                    self.second_moment += (2*self.k[j])-1 #+k**2 - (k-1)**2
-                self.second_moment_track += [self.second_moment]
-
                 self.k1_obs += [self.k1_obs[-1]+2*self.obs_k[-1]] # each new observed edge adds 2 to the sum
                 self.k1_inf += [self.k1_inf[-1]+2*self.k[-1]] # each new influence edge adds 2 to the sum
                 self.twomoment_obs += [self.twomoment_obs[-1]+self.obs_k[-1]**2+2*self.obs_k[target]-1] # add new node value and modified (single) target value minus previous target value
@@ -303,7 +311,8 @@ class cc_graph:
         if isinstance(self.p,str):
             pass
         else:
-            k_mom = self.p * np.array(self.second_moment_track)/(2*T_track)
+            if type(self.twomoment_inf[-1]) is float: self.twomoment_inf *= np.arange(1,self.t,dtype=float)
+            k_mom = self.p * np.array(self.twomoment_inf)/(2*T_track)
             #Ratio of second to first moment scaled by p
             crossover = np.argmin(k_mom<1) #Index where k_mom exceeds 1
             if k_mom[crossover]>1: #Only plot if crossover reached
@@ -374,7 +383,3 @@ class cc_graph:
         plt.legend()
 
         plt.show()
-
-G = cc_graph(p=0.1, statistics=True)
-G.add_nodes(10**5)
-G.plot_averages(log='log')
