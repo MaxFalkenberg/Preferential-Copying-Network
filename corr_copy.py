@@ -142,7 +142,7 @@ class cc_graph:
             copy_nodes = [target]
             for j in copy_candidates:
                 if isinstance(self.p,str):
-                    if random.random() < self.obs_k[j]/self.k[j]:
+                    if random.random() < self.obs_k[target]/self.k[target]:
                         copy_nodes.append(j)
                 else:
                     if random.random() < self.p:
