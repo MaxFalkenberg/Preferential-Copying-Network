@@ -312,7 +312,7 @@ class cc_graph:
             pass
         else:
             if type(self.twomoment_inf[-1]) is float: self.twomoment_inf *= np.arange(1,self.t,dtype=float)
-            k_mom = self.p * np.array(self.twomoment_inf)/(2*T_track)
+            k_mom = self.p * np.array(self.twomoment_inf[1:])/(2*T_track)
             #Ratio of second to first moment scaled by p
             crossover = np.argmin(k_mom<1) #Index where k_mom exceeds 1
             if k_mom[crossover]>1: #Only plot if crossover reached
