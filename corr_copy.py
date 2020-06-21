@@ -176,7 +176,7 @@ class cc_graph:
                 self.neighborsum_inf += [self.neighborsum_inf[-1]+len(copy_nodes)*self.k[-1]+twosteps+neighborsum_inf] # adds new node's contribution to nodes 1 step away and 2 steps away, and new node's neighbor sum, respectively
         print(time.time()-start_time)
 
-    def degree_dist(self,mode = 'inf',plot=True):
+    def degree_dist(self,mode = 'inf',plot=True,savefig=False):
         """
         Export degree distribution for the observed or influence network.
         Parameters
@@ -216,7 +216,7 @@ class cc_graph:
             plt.title(mode,fontsize=15)
             plt.tick_params(labelsize='large',direction='out',right = False,top=False)
             plt.tight_layout()
-            plt.show()
+            if savefig: plt.savefig('p='+str(self.p)+' N='+str(self.t)+' kdist.png')
         return x,y
 
     def kernel(self,mode='inf',plot=True):
@@ -282,7 +282,7 @@ class cc_graph:
             plt.show()
         return k1_bin,k2_bin
 
-    def plot_edge_growth(self,scaling=None):
+    def plot_edge_growth(self,scaling=None,savefig=False):
         """
         Plot number of edges in the influence network over time.
         Parameters
@@ -326,9 +326,9 @@ class cc_graph:
         plt.yscale('log')
         plt.legend(loc='best')
         plt.tight_layout()
-        plt.show()
+        if savefig: plt.savefig('p='+str(self.p)+' N='+str(self.t)+' edge growth.png')
 
-    def plot_averages(self,log=None):
+    def plot_averages(self,log=None,savefig=False):
         """
         Plot averages of interest over time
         Parameters
@@ -362,6 +362,7 @@ class cc_graph:
         if log == 'log': plt.xscale('log')
         plt.xlabel(r'$t$')
         plt.legend()
+        if savefig: plt.savefig('p='+str(self.p)+' N='+str(self.t)+' k1obs.png')
 
         plt.figure()
         plt.plot(k1_inf,'.',label='k1_inf') # plot average influence first degree
@@ -372,6 +373,7 @@ class cc_graph:
         if log == 'log': plt.xscale('log')
         plt.xlabel(r'$t$')
         plt.legend()
+        if savefig: plt.savefig('p='+str(self.p)+' N='+str(self.t)+' k1inf.png')
 
         plt.figure()
         plt.plot(k2_inf,'.',label='k2_inf') # plot average influence second degree
@@ -381,5 +383,4 @@ class cc_graph:
         if log == 'log': plt.xscale('log')
         plt.xlabel(r'$t$')
         plt.legend()
-
-        plt.show()
+        if savefig: plt.savefig('p='+str(self.p)+' N='+str(self.t)+' k2inf.png')
