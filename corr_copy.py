@@ -10,6 +10,9 @@ Correlated copying graph generator.
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.rcParams['text.usetex'] = True
+mpl.rcParams['text.latex.preamble'] = [r'\usepackage{amsmath}'] #for \text command
 import time
 
 class cc_graph:
@@ -176,7 +179,7 @@ class cc_graph:
                 self.neighborsum_inf += [self.neighborsum_inf[-1]+len(copy_nodes)*self.k[-1]+twosteps+neighborsum_inf] # adds new node's contribution to nodes 1 step away and 2 steps away, and new node's neighbor sum, respectively
         print(time.time()-start_time)
 
-    def degree_dist(self,mode = 'inf',plot=True,savefig=False):
+    def degree_dist(self,mode = 'inf',plot=True):
         """
         Export degree distribution for the observed or influence network.
         Parameters
@@ -216,7 +219,6 @@ class cc_graph:
             plt.title(mode,fontsize=15)
             plt.tick_params(labelsize='large',direction='out',right = False,top=False)
             plt.tight_layout()
-            if savefig: plt.savefig('p='+str(self.p)+' N='+str(self.t)+' kdist.png')
         return x,y
 
     def kernel(self,mode='inf',plot=True):
@@ -296,7 +298,7 @@ class cc_graph:
             raise Exception('Statistics for edge growth not recorded.')
         x = np.arange(2,len(self.T_track)+2,dtype='uint64') #time
         x_track = np.arange(3,len(self.T_track)+3,dtype='uint64') #time
-
+        plt.figure()
         plt.plot(x,x-1,color='k',ls='--',label=r'$\propto t$') #linear scaling
         plt.plot(x,(x*(x-1))/2,color='k',ls='-.',label=r'$\propto t^{2}$') #complete graph
         if scaling != None: #Add trendline for custom scaling
@@ -326,7 +328,7 @@ class cc_graph:
         plt.yscale('log')
         plt.legend(loc='best')
         plt.tight_layout()
-        if savefig: plt.savefig('p='+str(self.p)+' N='+str(self.t)+' edge growth.png')
+        if savefig: plt.savefig('edgegrowth.png')
 
     def plot_averages(self,log=None,savefig=False):
         """
@@ -357,30 +359,30 @@ class cc_graph:
         self.neighborsum_inf = [2] # total obversed neighbor degree sum over time
 
         plt.figure()
-        plt.plot(k1_obs,'.',label='k1_obs') # plot average observed first degree
+        plt.plot(k1_obs,'.',ms=1,label=r'$\left \langle k^{(\text{1,obs})} \right \rangle$') # plot average observed first degree
         if log is not None: plt.yscale('log')
         if log == 'log': plt.xscale('log')
         plt.xlabel(r'$t$')
         plt.legend()
-        if savefig: plt.savefig('p='+str(self.p)+' N='+str(self.t)+' k1obs.png')
+        if savefig: plt.savefig('k1obs.png')
 
         plt.figure()
-        plt.plot(k1_inf,'.',label='k1_inf') # plot average influence first degree
-        plt.plot(k2_obs,'.',label='k2_obs') # plot average observed second degree
-        plt.plot(twomoment_obs,'.',label='twomoment_obs') # plot average observed second moment
-        plt.plot(neighborsum_obs,'.',label='neighborsum_obs') # plot average observed neighbor degree sum
+        plt.plot(k1_inf,'.',ms=1,label=r'$\left \langle k^{(\text{1,inf})} \right \rangle$') # plot average influence first degree
+        plt.plot(k2_obs,'.',ms=1,label=r'$\left \langle k^{(\text{2,obs})} \right \rangle$') # plot average observed second degree
+        plt.plot(twomoment_obs,'.',ms=1,label=r'$\left \langle {\left( k^{(\text{1,obs})} \right)}^2 \right \rangle$') # plot average observed second moment
+        plt.plot(neighborsum_obs,'.',ms=1,label=r'$\frac{1}{N} \sum^{N}_{i=1} \sum^{k^{(\text{1,obs})}_i}_{\alpha=1} k^{(\text{1,obs})}_{i \alpha}$') # plot average observed neighbor degree sum
         if log is not None: plt.yscale('log')
         if log == 'log': plt.xscale('log')
         plt.xlabel(r'$t$')
         plt.legend()
-        if savefig: plt.savefig('p='+str(self.p)+' N='+str(self.t)+' k1inf.png')
+        if savefig: plt.savefig('k1inf.png')
 
         plt.figure()
-        plt.plot(k2_inf,'.',label='k2_inf') # plot average influence second degree
-        plt.plot(twomoment_inf,'.',label='twomoment_inf') # plot average influence second moment
-        plt.plot(neighborsum_inf,'.',label='neighborsum_inf') # plot average influence neighbor degree sum
+        plt.plot(k2_inf,'.',ms=1,label=r'$\left \langle k^{(\text{2,inf})} \right \rangle$') # plot average influence second degree
+        plt.plot(twomoment_inf,'.',ms=1,label=r'$\left \langle {\left( k^{(\text{1,inf})} \right)}^2 \right \rangle$') # plot average influence second moment
+        plt.plot(neighborsum_inf,'.',ms=1,label=r'$\frac{1}{N} \sum^{N}_{i=1} \sum^{k^{(\text{1,obs})}_i}_{\alpha=1} k^{(\text{1,obs})}_{i \alpha}$') # plot average influence neighbor degree sum
         if log is not None: plt.yscale('log')
         if log == 'log': plt.xscale('log')
         plt.xlabel(r'$t$')
         plt.legend()
-        if savefig: plt.savefig('p='+str(self.p)+' N='+str(self.t)+' k2inf.png')
+        if savefig: plt.savefig('k2inf.png')
