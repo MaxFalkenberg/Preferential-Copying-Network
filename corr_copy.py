@@ -177,7 +177,7 @@ class cc_graph:
                     neighborsum_inf += self.k[j]
                 self.k2_inf += [self.k2_inf[-1] + 2*(len(k2_inf)-1)] # (new node adds 1 to k2 of all nodes 1 or 2 steps from new node) = k2 of new node
                 self.neighborsum_inf += [self.neighborsum_inf[-1]+len(copy_nodes)*self.k[-1]+twosteps+neighborsum_inf] # adds new node's contribution to nodes 1 step away and 2 steps away, and new node's neighbor sum, respectively
-        print(time.time()-start_time)
+        # print(time.time()-start_time)
 
     def degree_dist(self,mode = 'inf',plot=True):
         """
