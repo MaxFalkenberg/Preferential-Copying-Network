@@ -11,8 +11,8 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-mpl.rcParams['text.usetex'] = True
-mpl.rcParams['text.latex.preamble'] = [r'\usepackage{amsmath}'] #for \text command
+# mpl.rcParams['text.usetex'] = True
+# mpl.rcParams['text.latex.preamble'] = [r'\usepackage{amsmath}'] #for \text command
 import time
 
 class cc_graph:
@@ -142,14 +142,12 @@ class cc_graph:
             self.obs_k[target] += 1
 
             copy_candidates = self.adjlist[target] #Neighbors of target which may be copied
-            copy_nodes = [target]
-            for j in copy_candidates:
-                if isinstance(self.p,str):
-                    if random.random() < self.obs_k[target]/self.k[target]:
-                        copy_nodes.append(j)
-                else:
-                    if random.random() < self.p:
-                        copy_nodes.append(j)
+            if isinstance(self.p,str):
+                p = float(self.obs_k[target])/float(self.k[target])
+            else:
+                p = self.p
+            copy_nodes = np.array(copy_candidates)[np.random.rand(len(copy_candidates))<p].tolist()
+            copy_nodes.append(target)
             self.__targets += copy_nodes #New copied targets
             self.__targets += [self.t]*len(copy_nodes) #New node targets
             self.adjlist += [copy_nodes] #Adjust adjacency lists
