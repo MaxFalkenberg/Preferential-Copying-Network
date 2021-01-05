@@ -107,6 +107,7 @@ class cc_graph:
         self.p = p #copying probability
         self.seed = seed #Random seed
         random.seed(seed)
+        np.random.seed(seed)
         self.__statistics = statistics #Track statistics?
         self.__targets = [0,1] #Target list
         self.T = 2 #Number of targets (including repeats)
